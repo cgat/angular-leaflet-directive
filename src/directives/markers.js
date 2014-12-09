@@ -35,7 +35,7 @@ angular.module("leaflet-directive").directive('markers', function ($log, $rootSc
 
                 getLayers().then(function(layers) {
                     leafletData.setMarkers(leafletMarkers, attrs.id);
-                    leafletScope.$watch('markers', function(newMarkers) {
+                    leafletScope.$watchCollection('markers', function(newMarkers) {
                         // Delete markers from the array
                         for (var name in leafletMarkers) {
                             if (!isDefined(newMarkers) || !isDefined(newMarkers[name])) {

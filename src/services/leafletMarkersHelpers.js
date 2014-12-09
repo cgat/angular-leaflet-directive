@@ -390,7 +390,7 @@ angular.module("leaflet-directive").factory('leafletMarkersHelpers', function ($
                 } else if (markerLatLng.lat !== markerData.lat || markerLatLng.lng !== markerData.lng) {
                     marker.setLatLng([markerData.lat, markerData.lng]);
                 }
-            }, true);
+            });
         }
     };
 });

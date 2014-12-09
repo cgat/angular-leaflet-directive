@@ -48,10 +48,10 @@ angular.module("leaflet-directive").directive('paths', function ($log, $q, leafl
                                 return;
                             }
                             setPathOptions(leafletPath, pathData.type, pathData);
-                        }, true);
+                        });
                     };
 
-                    leafletScope.$watch("paths", function (newPaths) {
+                    leafletScope.$watchCollection("paths", function (newPaths) {
 
                         // Create the new paths
                         for (var newName in newPaths) {
@@ -123,7 +123,7 @@ angular.module("leaflet-directive").directive('paths', function ($log, $q, leafl
                             }
                         }
 
-                    }, true);
+                    });
 
                 });
             });

@@ -865,7 +865,7 @@ angular.module("leaflet-directive").directive('markers', ["$log", "$rootScope", 
 
                 getLayers().then(function(layers) {
                     leafletData.setMarkers(leafletMarkers, attrs.id);
-                    leafletScope.$watch('markers', function(newMarkers) {
+                    leafletScope.$watchCollection('markers', function(newMarkers) {
                         // Delete markers from the array
                         for (var name in leafletMarkers) {
                             if (!isDefined(newMarkers) || !isDefined(newMarkers[name])) {
@@ -1013,10 +1013,10 @@ angular.module("leaflet-directive").directive('paths', ["$log", "$q", "leafletDa
                                 return;
                             }
                             setPathOptions(leafletPath, pathData.type, pathData);
-                        }, true);
+                        });
                     };
 
-                    leafletScope.$watch("paths", function (newPaths) {
+                    leafletScope.$watchCollection("paths", function (newPaths) {
 
                         // Create the new paths
                         for (var newName in newPaths) {
@@ -1088,7 +1088,7 @@ angular.module("leaflet-directive").directive('paths', ["$log", "$q", "leafletDa
                             }
                         }
 
-                    }, true);
+                    });
 
                 });
             });
@@ -3435,7 +3435,7 @@ angular.module("leaflet-directive").factory('leafletMarkersHelpers', ["$rootScop
                 } else if (markerLatLng.lat !== markerData.lat || markerLatLng.lng !== markerData.lng) {
                     marker.setLatLng([markerData.lat, markerData.lng]);
                 }
-            }, true);
+            });
         }
     };
 }]);
