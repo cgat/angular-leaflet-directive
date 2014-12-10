@@ -371,8 +371,10 @@ angular.module("leaflet-directive").factory('leafletMarkersHelpers', function ($
                         }
                     } else {
                         // The marker has possibly moved. It can be moved by a user drag (marker location and data are equal but old
-                        // data is diferent) or programatically (marker location and data are diferent)
-                        if ((markerLatLng.lat !== markerData.lat) || (markerLatLng.lng !== markerData.lng)) {
+                        // data is diferent) or programatically (marker location and data are different).
+                        // If the marker's _preSpiderfyLatLng is set, that means it is in the spiderfy state and a move
+                        // does not require an update (the MarkerCluster plugin is taking care of the update).
+                        if (!isDefined(marker._preSpiderfyLatlng) &&((markerLatLng.lat !== markerData.lat) || (markerLatLng.lng !== markerData.lng))) {
                             // The marker was moved by a user drag
                             layers.overlays[markerData.layer].removeLayer(marker);
                             marker.setLatLng([markerData.lat, markerData.lng]);

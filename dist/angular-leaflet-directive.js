@@ -865,7 +865,7 @@ angular.module("leaflet-directive").directive('markers', ["$log", "$rootScope", 
 
                 getLayers().then(function(layers) {
                     leafletData.setMarkers(leafletMarkers, attrs.id);
-                    leafletScope.$watchCollection('markers', function(newMarkers) {
+                    leafletScope.$watch('markers', function(newMarkers) {
                         // Delete markers from the array
                         for (var name in leafletMarkers) {
                             if (!isDefined(newMarkers) || !isDefined(newMarkers[name])) {
@@ -956,7 +956,7 @@ angular.module("leaflet-directive").directive('markers', ["$log", "$rootScope", 
                                 bindMarkerEvents(marker, newName, markerData, leafletScope);
                             }
                         }
-                    }, true);
+                    });
                 });
             });
         }
@@ -3416,8 +3416,10 @@ angular.module("leaflet-directive").factory('leafletMarkersHelpers', ["$rootScop
                         }
                     } else {
                         // The marker has possibly moved. It can be moved by a user drag (marker location and data are equal but old
-                        // data is diferent) or programatically (marker location and data are diferent)
-                        if ((markerLatLng.lat !== markerData.lat) || (markerLatLng.lng !== markerData.lng)) {
+                        // data is diferent) or programatically (marker location and data are different).
+                        // If the marker's _preSpiderfyLatLng is set, that means it is in the spiderfy state and a move
+                        // does not require an update (the MarkerCluster plugin is taking care of the update).
+                        if (!isDefined(marker._preSpiderfyLatlng) &&((markerLatLng.lat !== markerData.lat) || (markerLatLng.lng !== markerData.lng))) {
                             // The marker was moved by a user drag
                             layers.overlays[markerData.layer].removeLayer(marker);
                             marker.setLatLng([markerData.lat, markerData.lng]);

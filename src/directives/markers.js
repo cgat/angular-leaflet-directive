@@ -126,7 +126,7 @@ angular.module("leaflet-directive").directive('markers', function ($log, $rootSc
                                 bindMarkerEvents(marker, newName, markerData, leafletScope);
                             }
                         }
-                    }, true);
+                    });
                 });
             });
         }
