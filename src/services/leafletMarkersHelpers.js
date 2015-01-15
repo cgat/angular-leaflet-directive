@@ -198,7 +198,7 @@ angular.module("leaflet-directive").factory('leafletMarkersHelpers', function ($
         },
 
         addMarkerWatcher: function(marker, name, leafletScope, layers, map) {
-            var clearWatch = leafletScope.$watch("markers[\""+name+"\"]", function(markerData, oldMarkerData) {
+            var clearWatch = leafletScope.$watchCollection("markers[\""+name+"\"]", function(markerData, oldMarkerData) {
                 if (!isDefined(markerData)) {
                     _deleteMarker(marker, map, layers);
                     clearWatch();
