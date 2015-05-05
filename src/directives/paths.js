@@ -1,4 +1,4 @@
-angular.module("leaflet-directive").directive('paths', function ($log, $q, leafletData, leafletMapDefaults, leafletHelpers, leafletPathsHelpers, leafletEvents) {
+angular.module("leaflet-directive").directive('paths', function ($log, $q, leafletData, leafletMapDefaults, leafletHelpers, leafletPathsHelpers, leafletEvents, leafletWatchHelpers) {
     return {
         restrict: "A",
         scope: false,
@@ -13,7 +13,8 @@ angular.module("leaflet-directive").directive('paths', function ($log, $q, leafl
                 paths     = leafletScope.paths,
                 createPath = leafletPathsHelpers.createPath,
                 bindPathEvents = leafletEvents.bindPathEvents,
-                setPathOptions = leafletPathsHelpers.setPathOptions;
+                setPathOptions = leafletPathsHelpers.setPathOptions,
+                maybeWatch = leafletWatchHelpers.maybeWatch;
 
             mapController.getMap().then(function(map) {
                 var defaults = leafletMapDefaults.getDefaults(attrs.id),
@@ -34,13 +35,21 @@ angular.module("leaflet-directive").directive('paths', function ($log, $q, leafl
                     return;
                 }
 
+                //legacy behaviour does a watch collection on the paths
+                var _legacyWatchOptions = {
+                    doWatch: 'collection',
+                    isDeep: true,
+                    individual: {
+                        doWatch: true,
+                        isDeep: true
+                    }
+                };
+                var watchOptions = leafletScope.pathsWatchOptions || _legacyWatchOptions;
+
                 getLayers().then(function(layers) {
 
                     var leafletPaths = {};
                     leafletData.setPaths(leafletPaths, attrs.id);
-
-                    // Should we watch for every specific marker on the map?
-                    var shouldWatch = (!isDefined(attrs.watchPaths) || attrs.watchPaths === 'true');
 
                     // Function for listening every single path once created
                     var watchPathFn = function(leafletPath, name) {
@@ -57,11 +66,10 @@ angular.module("leaflet-directive").directive('paths', function ($log, $q, leafl
                                 return;
                             }
                             setPathOptions(leafletPath, pathData.type, pathData);
-                        }, true);
+                        }, watchOptions.individual.isDeep);
                     };
 
-                    leafletScope.$watchCollection("paths", function (newPaths) {
-
+                    var _clean = function(newPaths){
                         // Delete paths (by name) from the array
                         for (var name in leafletPaths) {
                             if (!isDefined(newPaths[name])) {
@@ -69,7 +77,10 @@ angular.module("leaflet-directive").directive('paths', function ($log, $q, leafl
                                 delete leafletPaths[name];
                             }
                         }
+                    };
 
+                    var _create = function(newPaths){
+                        _clean(newPaths);
                         // Create the new paths
                         for (var newName in newPaths) {
                             if (newName.search('\\$') === 0) {
@@ -121,7 +132,7 @@ angular.module("leaflet-directive").directive('paths', function ($log, $q, leafl
                                     // The path goes to a correct layer group, so first of all we add it
                                     layerGroup.addLayer(newPath);
 
-                                    if (shouldWatch) {
+                                    if (watchOptions.individual.doWatch) {
                                         watchPathFn(newPath, newName);
                                     } else {
                                         setPathOptions(newPath, pathData.type, pathData);
@@ -131,7 +142,7 @@ angular.module("leaflet-directive").directive('paths', function ($log, $q, leafl
                                     leafletPaths[newName] = newPath;
                                     map.addLayer(newPath);
 
-                                    if (shouldWatch) {
+                                    if (watchOptions.individual.doWatch) {
                                         watchPathFn(newPath, newName);
                                     } else {
                                         setPathOptions(newPath, pathData.type, pathData);
@@ -141,7 +152,12 @@ angular.module("leaflet-directive").directive('paths', function ($log, $q, leafl
                                 bindPathEvents(newPath, newName, pathData, leafletScope);
                             }
                         }
+                    };
+
+                    maybeWatch(leafletScope,'paths', watchOptions, function(newMarkers){
+                        _create(newMarkers);
                     });
+
                 });
             });
         }

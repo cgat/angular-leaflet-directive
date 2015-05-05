@@ -18,7 +18,8 @@ angular.module("leaflet-directive", []).directive('leaflet',
             decorations    : '=',
             eventBroadcast : '=',
             markersWatchOptions : '=',
-            geojsonWatchOptions : '='
+            geojsonWatchOptions : '=',
+            pathsWatchOptions: '='
         },
         transclude: true,
         template: '<div class="angular-leaflet-map"><div ng-transclude></div></div>',
