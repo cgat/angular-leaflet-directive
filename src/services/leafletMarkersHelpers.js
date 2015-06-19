@@ -116,16 +116,7 @@ angular.module("leaflet-directive").service('leafletMarkersHelpers', function ($
         }
     };
 
-    var adjustPopupPan = function(marker, map) {
-        var containerHeight = marker._popup._container.offsetHeight,
-            layerPos = new L.Point(marker._popup._containerLeft, -containerHeight - marker._popup._containerBottom),
-            containerPos = map.layerPointToContainerPoint(layerPos);
-        if (containerPos !== null) {
-            marker._popup._adjustPan();
-        }
-    };
-
-    var compilePopup = function(marker, markerScope) {
+var compilePopup = function(marker, markerScope) {
         $compile(marker._popup._contentNode)(markerScope);
     };
 
@@ -134,10 +125,11 @@ angular.module("leaflet-directive").service('leafletMarkersHelpers', function ($
         //We need to keep trying until angular has compiled before we _updateLayout and _updatePosition
         //This should take care of any scenario , eg ngincludes, whatever.
         //Is there a better way to check for this?
-        if (marker._popup._contentNode.innerText.length < 1) {
+        if (!(marker._popup._contentNode && marker._popup._contentNode.innerText && marker._popup._contentNode.innerText.length >= 1)) {
             $timeout(function () {
                 updatePopup(marker, markerScope, map);
             });
+            return;
         }
 
         //cause a reflow - this is also very important - if we don't do this then the widths are from before $compile
@@ -161,11 +153,13 @@ angular.module("leaflet-directive").service('leafletMarkersHelpers', function ($
             compileMessage = isDefined(markerData.compileMessage) ? markerData.compileMessage : true;
 
         if (compileMessage) {
-            if (!isDefined(marker._popup) || !isDefined(marker._popup._contentNode)) {
+            if (!isDefined(marker._popup)) {
                 $log.error(errorHeader + 'Popup is invalid or does not have any content.');
                 return false;
             }
-
+            if(!isDefined(marker._popup._contentNode)) {
+                updatePopup(marker, markerData, map);
+            }
             compilePopup(marker, markerScope);
             updatePopup(marker, markerData, map);
         }
