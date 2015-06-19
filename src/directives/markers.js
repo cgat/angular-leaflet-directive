@@ -213,7 +213,7 @@ angular.module("leaflet-directive").directive('markers',
                         var skips = _getNewModelsToSkipp(models, oldModels, leafletMarkers);
                         if(isNested) {
                             $it.each(models, function(markersToAdd, layerName) {
-                                _addMarkers(markersToAdd, map, layers, leafletMarkers, leafletScope,
+                                _addMarkers(markersToAdd, oldModels, map, layers, leafletMarkers, leafletScope,
                                     watchOptions, layerName, skips);
                             });
                             return;
