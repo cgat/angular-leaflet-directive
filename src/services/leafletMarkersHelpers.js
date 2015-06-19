@@ -275,17 +275,7 @@ angular.module("leaflet-directive").service('leafletMarkersHelpers', function ($
             });
         },
 
-        addMarkerWatcher: function (marker, name, leafletScope, layers, map, isDeepWatch) {
-            var markerWatchPath = Helpers.getObjectArrayPath("markers." + name);
-            isDeepWatch = defaultTo(isDeepWatch, true);
-            //TODO:break up this 200 line function to be readable (nmccready)
-            var clearWatch = leafletScope.$watch(markerWatchPath, function (markerData, oldMarkerData) {
-                if (!isDefined(markerData)) {
-                    _deleteMarker(marker, map, layers);
-                    clearWatch();
-                    return;
-                }
-
+        updateMarker: function (markerData, oldMarkerData, marker, name, leafletScope, layers, map) {
                 if (!isDefined(oldMarkerData)) {
                     return;
                 }
@@ -400,8 +390,8 @@ angular.module("leaflet-directive").service('leafletMarkersHelpers', function ($
                     if (dragG) {
                         marker.dragging.enable();
                     }
-                    marker.closePopup();
-                    marker.unbindPopup();
+                    // marker.closePopup();
+                    // marker.unbindPopup();
                     if (isString(markerData.message)) {
                         marker.bindPopup(markerData.message, markerData.popupOptions);
                     }
@@ -497,7 +487,21 @@ angular.module("leaflet-directive").service('leafletMarkersHelpers', function ($
                 } else if (markerLatLng.lat !== markerData.lat || markerLatLng.lng !== markerData.lng) {
                     marker.setLatLng([markerData.lat, markerData.lng]);
                 }
-            }, isDeepWatch);
+        },
+
+        addMarkerWatcher: function (marker, name, leafletScope, layers, map, isDeepWatch) {
+            var _this = this;
+            var markerWatchPath = Helpers.getObjectArrayPath("markers." + name);
+            isDeepWatch = defaultTo(isDeepWatch, true);
+            //TODO:break up this 200 line function to be readable (nmccready)
+            var clearWatch = leafletScope.$watch(markerWatchPath, function(markerData, oldMarkerData) {
+                if (!isDefined(markerData)) {
+                    _deleteMarker(marker, map, layers);
+                    clearWatch();
+                    return;
+                }
+                _this.updateMarker(markerData, oldMarkerData, marker, name, leafletScope, layers, map);
+            } , isDeepWatch);
         },
         string: _string,
         log: _log
